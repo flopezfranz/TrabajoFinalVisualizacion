@@ -1,0 +1,39 @@
+---
+title: "TrabajoFinalVisualización"
+author: "Fernanda López Franz"
+date: "2023-08-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(ggplot2)
+library(dplyr)
+library(readxl)
+```
+
+```{r}
+EncPer <- "EncuestaPercepciones.xlsx"
+ruta_completa <- file.path(getwd(), "EncuestaPercepciones")
+print(ruta_completa)
+```
+
+```{r}
+EncPer<-read_excel("C:/Users/Punto Digital/Desktop/Visualización de datos/TrabajoFinalVisualizacion/EncuestaPercepciones.xlsx")
+
+```
+## Introducción
+Entre febrero y marzo del año 2023, se realizó la Encuesta Percepciones sobre Democracia y Tecnología en Argentina. La realización de esta encuesta tuvo por objetivo conocer las percepciones sobre la democracia y las tecnologías de la información y la comunicación de los y las argentinas que acceden a la red de puntos digitales del Programa Punto Digital.
+
+Se obtuvieron 2035 respuestas en 270 Puntos Digitales. 
+
+Los Puntos Digitales son dispositivos de inclusión digital libres y gratuitos instalados en todas las provincias argentinas y dependientes de la Secretaría de Innovación Pública perteneciente a la Jefatura de Gabinete de Ministros.
+
+
+
+
+
+
+
