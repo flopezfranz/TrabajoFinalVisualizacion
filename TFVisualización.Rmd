@@ -6,12 +6,18 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+	)
 ```
+
 ```{r}
 library(ggplot2)
 library(dplyr)
 library(readxl)
+library(kableExtra)
 ```
 
 ```{r}
@@ -24,16 +30,102 @@ print(ruta_completa)
 EncPer<-read_excel("C:/Users/Punto Digital/Desktop/Visualización de datos/TrabajoFinalVisualizacion/EncuestaPercepciones.xlsx")
 
 ```
+
 ## Introducción
-Entre febrero y marzo del año 2023, se realizó la Encuesta Percepciones sobre Democracia y Tecnología en Argentina. La realización de esta encuesta tuvo por objetivo conocer las percepciones sobre la democracia y las tecnologías de la información y la comunicación de los y las argentinas que acceden a la red de puntos digitales del Programa Punto Digital.
 
-Se obtuvieron 2035 respuestas en 270 Puntos Digitales. 
+Entre febrero y marzo del año 2023, se realizó la **Encuesta Percepciones sobre Democracia y Tecnología en Argentina**. La realización de esta encuesta tuvo por objetivo conocer las percepciones sobre la democracia y las tecnologías de la información y la comunicación de los y las argentinas que acceden a la red de puntos digitales del Programa Punto Digital.
 
-Los Puntos Digitales son dispositivos de inclusión digital libres y gratuitos instalados en todas las provincias argentinas y dependientes de la Secretaría de Innovación Pública perteneciente a la Jefatura de Gabinete de Ministros.
+Se obtuvieron 2600 respuestas en 270 Puntos Digitales.
+
+Los **Puntos Digitales** son dispositivos de inclusión digital libres y gratuitos instalados en todas las provincias argentinas y dependientes de la Secretaría de Innovación Pública perteneciente a la Jefatura de Gabinete de Ministros.
+
+Se realizaron encuestas a todos los Puntos Digitales de todas las pronvicas argentinas y el número de respuestas varía de acuerdo al número de Puntos Digitales instalados en cada jurisdicción.
+
+```{r}
+EncPer %>%
+  count(Provincia, name = "Total") %>% 
+  arrange(desc(Total)) %>% 
+  knitr::kable(col.names = c("Provincia","Total")) %>% 
+print()
+
+```
+```{r}
+EncPer %>%
+  count(Provincia, name = "Total") %>% 
+  arrange(desc(Total)) %>% 
+  ggplot(aes(Provincia,Total,fill=Provincia))+
+  geom_col()+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 
 
+En cuanto a la edad de lxs encuestados, el *valor mínimo* es *16* y el *valor máximo* es *84*.El promedio de edad de lxs encuestados es de *35 años*.
+```{r}
+EncPer %>% 
+  summarise(max_edad=max(Edad,na.rm=TRUE))
+
+  
+```
+```{r}
+EncPer %>% 
+  summarise(min_edad=min(Edad,na.rm=TRUE))
+```
+```{r}
+EncPer %>% 
+  summarise(media=mean(Edad,na.rm=TRUE))
+```
+En cuanto al género, el 62% de las encuestadas se identifica como mujer, el 36% como varón, el 1% prefiere no especificarlo, el 0.3% se identifica como mujer trans, el 0.11% como travesti y el 0.03% como varón trans. 
+
+```{r}
+  Género <- EncPer %>% 
+  count(Género, name = "Total") %>% 
+  mutate(Porcentaje = (Total / sum(Total)) * 100) %>% 
+  arrange(desc(Porcentaje)) %>% 
+  knitr::kable(col.names = c("Género","Total","Porcentaje")) %>% 
+print()
+
+```
+
+```{r}
+intervalos_edad <- cut(EncPer$Edad, breaks = seq(16, 86, by = 10), labels = c("16-26", "27-36", "37-46", "47-56", "57-56","67-66","77-86"))
+cantidad_por_grupo <- table(intervalos_edad)
+print(cantidad_por_grupo)
 
 
+```
+```{r}
 
+  barplot(table(intervalos_edad))
+
+```
+Sobre el *nivel educativo*, vemos que casi el 30% de la población encuestada posee secundaria completa seguidos por quienes cuentan con terciario completo y secundaria incompleta. 
+
+```{r}
+Nivel_Educativo <- table(EncPer$Educación)
+Nivel_Educativo <- data.frame(valores = names(Nivel_Educativo), frecuencia = as.vector(Nivel_Educativo)) %>% 
+arrange(desc(frecuencia)) %>% 
+mutate(porcentaje = (frecuencia/ sum(frecuencia)) * 100)
+print(Nivel_Educativo)
+
+```
+Casi el 80 % de la población encuestada trabaja:
+
+```{r}
+Trabajo <- table(EncPer$Trabajo)
+Trabajo <- data.frame(valores = names(Trabajo), frecuencia = as.vector(Trabajo)) %>% 
+arrange(desc(frecuencia)) %>% 
+mutate(porcentaje = (frecuencia/ sum(frecuencia)) * 100)
+print(Trabajo)
+```
+Siendo la situación contractual la siguiente:
+
+```{r}
+intervalos_edad <- cut(EncPer$Edad, breaks = c(16, 27, 37, 47, 57, 67, Inf), include.lowest = TRUE) 
+ggplot(EncPer, aes(x = intervalos_edad)) +
+  geom_bar() +
+  labs(title = "Distribución por Rango Etario", x = "Rango Etario", y = "Frecuencia")
+
+
+```
