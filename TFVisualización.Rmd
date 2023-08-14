@@ -1,5 +1,5 @@
 ---
-title: "TrabajoFinalVisualización"
+title: "Trabajo Final Visualización"
 author: "Fernanda López Franz"
 date: "2023-08-04"
 output: html_document
@@ -18,9 +18,13 @@ library(ggplot2)
 library(dplyr)
 library(readxl)
 library(kableExtra)
+library(RColorBrewer)
+library(ggthemes)
+library(hrbrthemes)
+library(plotly)
 ```
 
-```{r}
+```{r,echo=FALSE}
 EncPer <- "EncuestaPercepciones.xlsx"
 ruta_completa <- file.path(getwd(), "EncuestaPercepciones")
 print(ruta_completa)
@@ -33,99 +37,262 @@ EncPer<-read_excel("C:/Users/Punto Digital/Desktop/Visualización de datos/Traba
 
 ## Introducción
 
-Entre febrero y marzo del año 2023, se realizó la **Encuesta Percepciones sobre Democracia y Tecnología en Argentina**. La realización de esta encuesta tuvo por objetivo conocer las percepciones sobre la democracia y las tecnologías de la información y la comunicación de los y las argentinas que acceden a la red de puntos digitales del Programa Punto Digital.
-
-Se obtuvieron 2600 respuestas en 270 Puntos Digitales.
+Entre febrero y marzo del año 2023, se realizó la **Encuesta Percepciones sobre Democracia y Tecnología en Argentina**. El objetivo consistió en conocer las percepciones sobre la democracia y las tecnologías de la información y la comunicación de los y las argentinas que acceden a la red de puntos digitales del Programa Punto Digital.Se realizaron encuestas a todos los Puntos Digitales de todas las pronvicas argentinas y el número de respuestas varía de acuerdo al número de Puntos Digitales instalados en cada jurisdicción.Se obtuvieron 2600 respuestas en 270 Puntos Digitales.
 
 Los **Puntos Digitales** son dispositivos de inclusión digital libres y gratuitos instalados en todas las provincias argentinas y dependientes de la Secretaría de Innovación Pública perteneciente a la Jefatura de Gabinete de Ministros.
 
-Se realizaron encuestas a todos los Puntos Digitales de todas las pronvicas argentinas y el número de respuestas varía de acuerdo al número de Puntos Digitales instalados en cada jurisdicción.
+Este trabajo es una primera aproximación a la lectura de los datos relevados por la Encuesta, y que esperamos puedan seguir analizándose en el marco del trabajo en el Programa Punto Digital de la Secretaría de Innovación Pública de la Jefatura de Gabinete de Ministros. Los mayores avances que pudimos realizar, se refieren a la presentación de los datos recabados, y algunos cruces entre variables. 
 
-```{r}
+**Presentación de los datos**
+
+Más del 25% de las personas encuestadas, participa de los Puntos Digitales instalados en la provncia de Buenos Aires, seguidos por las provincias de Córdoba y Entre Ríos. 
+La variación en la cantidad de las respuestas se debe a varios factores. En primer lugar, al número de Puntos Digitales instalados en cada jurisdicción.En segundo término, al nivel de respuesta que los Equipos Locales de trabajo tienen con el Equipo Nacional al momento de cumplir con los requerimientos del Programa (en este caso, llevar adelante la encuesta).
+
+```{r respuestas-por-provincia}
+#fig.alt: La tabla presenta la cantidad de personas que respondieron la encuesta por Provincia.
+
 EncPer %>%
   count(Provincia, name = "Total") %>% 
+  mutate(Porcentaje = (Total / sum(Total)) * 100) %>% 
   arrange(desc(Total)) %>% 
-  knitr::kable(col.names = c("Provincia","Total")) %>% 
-print()
+  knitr::kable(col.names = c("Provincia", "Total","Porcentaje")) %>% 
+  kable_paper("hover", full_width = FALSE,position="left")
+
 
 ```
-```{r}
+
+
+
+```{r gráfico de barras representando cantidad de respuestas por provincia,fig.width=8,fig.height=6}
+
+#fig.alt: El gráfico de barras muestra que la mayor cantidad de personas que respondieron la encuesta viven en Buenos Aires, seguido por Córdoba, Entre Ríos y Misiones. 
+
 EncPer %>%
-  count(Provincia, name = "Total") %>% 
-  arrange(desc(Total)) %>% 
-  ggplot(aes(Provincia,Total,fill=Provincia))+
-  geom_col()+
-  theme(legend.position = "bottom")+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  ggplot(aes(Provincia,fill=Provincia))+
+  geom_bar()+
+  labs(title="Cantidad de respuestas por provincia",
+       subtitle = "Fuente: Encuesta de Percepciones sobre la Democracia y TIC",
+       y="Total de respuestas",
+       x="Provincia") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+   scale_x_discrete(labels=c("BA","CA","CH","CT","CABA","CB","CR","ER","FO","JY","LP","LR","MZ","MI","NQN","RN","SA","SJ","SL","SC","SF","SE","TF","TU"))+
+  
+    scale_y_discrete(expand=c(0,1))+
+  scale_y_continuous(breaks = seq(0,700,50))+
+  scale_fill_viridis_d()+
+   theme_ipsum_rc(base_size = 10)+
+  theme(legend.position = "bottom")
+   
+```
+```{r,fig.width=7}
+#el gráfico más feo
+
+EncPer %>%
+  ggplot(aes(Provincia,fill=Provincia))+
+ geom_bar() +
+    scale_fill_manual(values=c("yellow", "purple4","brown","green4", "purple4","black","green4", "purple4","black","green4", "purple4","black","green4", "purple4","yellow","green4", "purple4","orange","green4", "purple4","black","green4", "yellow","yellow"))+
+   labs(title="total",
+       y="rtas",
+       x="Pcia") +
+  scale_y_continuous(breaks = seq(0,2000,10))+
+   theme_dark(base_size = 16)+
+  theme(legend.position = "bottom",legend.background = element_rect(fill="pink",color="blue",linewidth = 1))
+    
+
+```
 
 
-
-
-En cuanto a la edad de lxs encuestados, el *valor mínimo* es *16* y el *valor máximo* es *84*.El promedio de edad de lxs encuestados es de *35 años*.
+EDAD DE LAS PERSONAS ENCUESTADAS
+En cuanto a la edad de lxs encuestados, el *valor mínimo* es *16*,que coincide con la edad mínima establecida al momento de configurar la encuesta, y el *valor máximo* es *84*.
+El promedio de edad de lxs encuestados es de *35 años*.
 ```{r}
 EncPer %>% 
-  summarise(max_edad=max(Edad,na.rm=TRUE))
+  summarise(max_edad=max(Edad,na.rm=TRUE)) %>% 
+   knitr::kable(col.names = "Máximo Edad")
 
   
 ```
 ```{r}
 EncPer %>% 
-  summarise(min_edad=min(Edad,na.rm=TRUE))
+  summarise(min_edad=min(Edad,na.rm=TRUE)) %>% 
+     knitr::kable(col.names = "Mínimo Edad")
 ```
 ```{r}
 EncPer %>% 
-  summarise(media=mean(Edad,na.rm=TRUE))
+  summarise(media=mean(Edad,na.rm=TRUE)) %>% 
+     knitr::kable(col.names = "Media Edad")
 ```
-En cuanto al género, el 62% de las encuestadas se identifica como mujer, el 36% como varón, el 1% prefiere no especificarlo, el 0.3% se identifica como mujer trans, el 0.11% como travesti y el 0.03% como varón trans. 
+GÉNERO
+En cuanto al género, utilizamos el criterio implementado en el último Censo Nacional para establecer las categorías.  El 62% de las encuestadas se identifica como mujer, el 36% como varón, el 1% prefiere no especificar, el 0.3% se identifica como mujer trans, el 0.11% como travesti y el 0.03% como varón trans. 
 
-```{r}
+```{r Distribución de cantidad de respuestas por Género}
+
+#fig.alt: La tabla muestra la distribuión de respuestas por género autopercibido y el porcentaje que representa. 
+
   Género <- EncPer %>% 
   count(Género, name = "Total") %>% 
   mutate(Porcentaje = (Total / sum(Total)) * 100) %>% 
   arrange(desc(Porcentaje)) %>% 
   knitr::kable(col.names = c("Género","Total","Porcentaje")) %>% 
-print()
+ kable_material_dark("hover",full_width = F) %>% 
+   print()
 
 ```
 
-```{r}
-intervalos_edad <- cut(EncPer$Edad, breaks = seq(16, 86, by = 10), labels = c("16-26", "27-36", "37-46", "47-56", "57-56","67-66","77-86"))
-cantidad_por_grupo <- table(intervalos_edad)
-print(cantidad_por_grupo)
+RANGO ETARIO
+Si bien el promedio de edad es, como mecionamos, de 35 años, la mayoría de las personas encuestadas tiene entre 16 y 26 años. 
 
+```{r distribución de respuestas por rango de edad,fig.width=8}
+#fig.alt: Se grafica la distribución de respuestas según el rango de edad.  
 
+intervalos_edad <- cut(EncPer$Edad, breaks = c(16, 27, 37, 47, 57, 67, Inf), include.lowest = TRUE)
+
+ggplot(EncPer, aes(x = intervalos_edad,fill=intervalos_edad,na.rm=TRUE)) +
+  geom_bar() +
+  scale_fill_viridis_d()+
+  scale_y_continuous(expand=c(0,1),breaks = seq(0,1200,50))+
+    scale_x_discrete(labels=c("16 a 26","27 a 36","37 a 46","47 a 56","57 a 66","Más de 67","No respondió"))+
+  labs(title = "Distribución por Rango Etario", x = "Rango Etario", y = "Número de respuestas",
+       subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC")+
+   theme_ipsum_rc(base_size = 10)
+  
 ```
-```{r}
+NIVEL EDUCATIVO
+Sobre el nivel educativo, vemos que casi el 30% de la población encuestada posee secundaria completa seguidos por quienes cuentan con terciario completo y secundaria incompleta. 
 
-  barplot(table(intervalos_edad))
+```{r distribución de respuestas según nivel educativo}
 
-```
-Sobre el *nivel educativo*, vemos que casi el 30% de la población encuestada posee secundaria completa seguidos por quienes cuentan con terciario completo y secundaria incompleta. 
+#fig.alt: La tabla muestra la distribuión de respuestas según el nivel educativo.
 
-```{r}
 Nivel_Educativo <- table(EncPer$Educación)
 Nivel_Educativo <- data.frame(valores = names(Nivel_Educativo), frecuencia = as.vector(Nivel_Educativo)) %>% 
 arrange(desc(frecuencia)) %>% 
-mutate(porcentaje = (frecuencia/ sum(frecuencia)) * 100)
-print(Nivel_Educativo)
+mutate(porcentaje = (frecuencia/ sum(frecuencia)) * 100) %>% 
+ knitr::kable(col.names = c("Nivel Educativo","Total","Porcentaje")) %>% 
+ kable_material_dark("hover",full_width = F) %>% 
+  print()
+  
 
 ```
-Casi el 80 % de la población encuestada trabaja:
+TRABAJO
+Casi el 80 % de la población encuestada trabaja.
 
 ```{r}
 Trabajo <- table(EncPer$Trabajo)
 Trabajo <- data.frame(valores = names(Trabajo), frecuencia = as.vector(Trabajo)) %>% 
 arrange(desc(frecuencia)) %>% 
-mutate(porcentaje = (frecuencia/ sum(frecuencia)) * 100)
-print(Trabajo)
+mutate(porcentaje = (frecuencia/ sum(frecuencia)) * 100) %>% 
+   knitr::kable(col.names = c("Trabajo","Total","Porcentaje")) %>% 
+ kable_material_dark("hover",full_width = F) %>% 
+  print()
+ 
+
+
+
+
 ```
-Siendo la situación contractual la siguiente:
+##PRIMERAS RELACIONES
+En términos globales, **casi la totalidad de las personas encuestadas, prefiere a la democracia como sistema de gobierno**.
+
+```{r,fig.width=8}
+EncPer %>%
+ggplot(aes(PrefDemoc,fill=PrefDemoc),na.rm=TRUE)+
+  geom_bar()+
+
+    scale_fill_brewer(palette="Accent")+
+
+  labs(title = "¿Considerás a la democracia preferible a cualquier 
+       otra forma de gobierno?",
+       subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC",
+     x="Prefiere a la democracia sobre otra forma de gobierno",
+                   x=2,y=2000,size=3) +
+ theme_ipsum_rc(base_size = 12)
+```
+
+Si analizamos la relación entre el rango etario y la respuesta a la pregunta ¿considerás a la democracia preferible a cualquier otra forma de gobierno? **no observamos variaciones significativas entre los diferentes rangos etarios**.
+
+```{r,fig.width=8}
+EncPer %>%
+ggplot(aes(intervalos_edad,fill=PrefDemoc),na.rm=TRUE)+
+geom_bar()+
+   scale_fill_brewer(palette="Accent")+
+labs(title = "Relación entre preferencia por la Democracia y rango etario", x = "Rango Etario", y = "Prefiere la Democracia a otro sistema de gobierno",
+       subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC") +
+    annotate("text",label="No observamos variaciones significativas según la edad",
+                   x=4,y=700) +
+scale_x_discrete(labels=c("16 a 26","27 a 36","37 a 46","47 a 56","57 a 66","Más de 67","No respondió"))+
+theme_ipsum_rc(base_size = 10)
+
+
+```
+
+Encontramos diferencias en la preferencia a la democracia sobre otro sistema de gobierno, entre las personas que trabajan y las personas que no trabajan. 
+
+```{r,fig.width=8}
+EncPer %>%
+  filter(!is.na(Trabajo)) %>% 
+  filter(!is.na(PrefDemoc)) %>% 
+ggplot(aes(Trabajo),na.rm=TRUE)+
+    geom_bar(aes(fill=PrefDemoc),position="fill")+
+    scale_fill_brewer(palette="Accent")+
+  labs(title = "Relación entre preferencia por la Democracia y Trabajo", x = "Trabajo", y = "Prefiere la Democracia a otro sistema de gobierno",subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC") +
+      theme_ipsum_rc(base_size = 10)
+  
+
+```
+Al consultar por el grado de satisfacción con el sistema democrático, obtenemos que más del 40% de las personas, se encuentran satisfechas con la democracia. 
 
 ```{r}
-intervalos_edad <- cut(EncPer$Edad, breaks = c(16, 27, 37, 47, 57, 67, Inf), include.lowest = TRUE) 
-ggplot(EncPer, aes(x = intervalos_edad)) +
-  geom_bar() +
-  labs(title = "Distribución por Rango Etario", x = "Rango Etario", y = "Frecuencia")
-
+Satis<-EncPer %>% 
+  filter(!is.na(Satis)) %>% 
+  count(Satis, name = "Total") %>% 
+ mutate(Porcentaje = (Total/ sum(Total)) * 100) %>% 
+  arrange(desc(Porcentaje)) %>% 
+  knitr::kable(col.names = c("Grado de satisfacción con la democracia","Total","Porcentaje")) %>% 
+ kable_material_dark("hover",full_width = FALSE) %>% 
+    print()
 
 ```
+RELACIÓN ENTRE GRADO DE SATISFACCIÓN CON LA DEMOCRACIA Y EDAD
+Nos interesa conocer si el grado de satisfacción con la democracia, varía con la edad. Podemos observar fluctuaciones entre las diferentes edades, pero no podemos asociarlas a rangos etarios. 
+
+```{r,fig.width=8}
+EncPer %>%
+  filter(!is.na(Satis)) %>%
+  ggplot(aes(Edad, fill = Satis),color="Edad") +
+  geom_histogram(alpha=0.8) +
+    scale_fill_viridis_d()+
+  labs(
+    title = "Satisfacción con la Democracia",
+    subtitle = "Fuente: Encuesta de Percepciones sobre la Democracia y TIC",
+    x="Edad",
+    y="Número de respuestas")+
+    scale_color_colorblind()+
+  scale_x_continuous(breaks = seq(16,84,4))+
+    theme_ipsum_rc(base_size = 10)
+```
+
+LA TECNOLOGÍA COMO DERECHO HUMANO
+La mayoría de las personas considera que el acceso a la tecnología es un derecho humano. 
+
+```{r,fig.width=8}
+EncPer %>% 
+  filter(!is.na(La_tecnología_es_un_DDHH)) %>% 
+  ggplot(aes(La_tecnología_es_un_DDHH,fill=La_tecnología_es_un_DDHH))+
+  geom_bar()+
+  scale_fill_brewer(palette="Accent")+
+  labs(title = "La tecnología como Derecho Humano", x = "¿Considerás que el acceso a las TIC es un DDHH?",subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC") +
+      theme_ipsum_rc(base_size = 10)
+```
+
+
+```{r,fig.width=8}
+EncPer %>% 
+  filter(!is.na(La_tecnología_es_un_DDHH)) %>% 
+  ggplot(aes(Edad,fill=La_tecnología_es_un_DDHH))+
+  geom_bar(position="fill")+
+    scale_fill_brewer(palette="Accent")+
+  labs(title = "La tecnología como Derecho Humano", x = "¿Considerás que el acceso a las TIC es un DDHH?",subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC") +
+      theme_ipsum_rc(base_size = 10)
+```
+
