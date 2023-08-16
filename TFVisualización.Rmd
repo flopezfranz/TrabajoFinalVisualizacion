@@ -31,7 +31,7 @@ print(ruta_completa)
 ```
 
 ```{r}
-EncPer<-read_excel("C:/Users/Punto Digital/Desktop/Visualización de datos/TrabajoFinalVisualizacion/EncuestaPercepciones.xlsx")
+EncPer<-read_excel("./data/EncuestaPercepciones.xlsx")
 
 ```
 
