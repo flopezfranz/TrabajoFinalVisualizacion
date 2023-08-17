@@ -2,7 +2,9 @@
 title: "Encuesta Percepciones sobre Democracia y Tecnología en Argentina"
 author: "Fernanda López Franz"
 date: "2023-08-04"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -17,7 +19,6 @@ knitr::opts_chunk$set(
 library(ggplot2)
 library(dplyr)
 library(readxl)
-library(kableExtra)
 library(RColorBrewer)
 library(ggthemes)
 library(hrbrthemes)
@@ -77,25 +78,27 @@ Enc_gt |>
 EncPer %>%
   ggplot(aes(Provincia,fill=Provincia))+
   geom_bar()+
-  labs(title="Cantidad de respuestas por provincia",
+   labs(title="Cantidad de respuestas por provincia",
        subtitle = "Fuente: Encuesta de Percepciones sobre la Democracia y TIC",
        y="Total de respuestas",
        x="Provincia") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
    scale_x_discrete(labels=c("BA","CA","CH","CT","CABA","CB","CR","ER","FO","JY","LP","LR","MZ","MI","NQN","RN","SA","SJ","SL","SC","SF","SE","TF","TU"))+
   scale_y_discrete(expand=c(0,1))+
-  scale_y_continuous(breaks = seq(0,700,50))+
+  scale_y_continuous(breaks = seq(0,800,50))+
   scale_fill_viridis_d()+
-  theme_ipsum_rc(base_size = 10)+
-  theme(legend.position = "bottom")
+  theme_ipsum_rc(base_size = 8)+
+  theme(legend.position = "bottom")+
+   geom_text(aes(label = ..count..), stat = "count", vjust = -0.4,size=3)
    
 ```
 
 
 
 EDAD DE LAS PERSONAS ENCUESTADAS
-En cuanto a la edad de lxs encuestados, el *valor mínimo* es *16*,que coincide con la edad mínima establecida al momento de configurar la encuesta, y el *valor máximo* es *84*.
-El promedio de edad de lxs encuestados es de *35 años*.
+
+Para realizar un análisis más específico agrupamos las edades en franjas etarias. En el marco de un análisis descriptivo, el promedio de edad de las personas encuestadas es de 35,7 años. El valor mínimo es de 16 y el máximo de 84. Además, cerca del 58,6% tiene entre 16 y 36 años. 
+
 ```{r}
 EncPer %>% 
   summarise(max_edad=max(Edad,na.rm=TRUE)) %>% 
@@ -146,26 +149,27 @@ RANGO ETARIO
 
 Si bien el promedio de edad es, como mecionamos, de 35 años, la mayoría de las personas encuestadas tiene entre 16 y 26 años, decreciendo hacia edades mayores. El máximo es de 
 
-```{r distribución de respuestas por rango de edad,fig.width=8}
+```{r distribución de respuestas por rango de edad,fig.width=7}
 #fig.alt: Se grafica la distribución de respuestas según el rango de edad.  
 
 intervalos_edad <- cut(EncPer$Edad, breaks = c(16, 27, 37, 47, 57, 67, Inf), include.lowest = TRUE)
 
 ggplot(EncPer, aes(x = intervalos_edad,fill=intervalos_edad,na.rm=TRUE)) +
   geom_bar() +
-  scale_fill_viridis_d()+
+  scale_fill_viridis_d(name="Rango etario")+
   scale_y_continuous(expand=c(0,1),breaks = seq(0,1200,50))+
     scale_x_discrete(labels=c("16 a 26","27 a 36","37 a 46","47 a 56","57 a 66","Más de 67","No respondió"))+
   labs(title = "Distribución por Rango Etario", x = "Rango Etario", y = "Número de respuestas",
        subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC")+
-   theme_ipsum_rc(base_size = 10)
+   theme_ipsum_rc(base_size = 10)+
+     geom_text(aes(label = ..count..), stat = "count", vjust = 1,size=4,color="grey")
   
 ```
 
 
 NIVEL EDUCATIVO
 
-Sobre el nivel educativo, vemos que casi el 30% de la población encuestada posee secundaria completa seguidos por quienes cuentan con terciario completo y secundaria incompleta. 
+El 29,48% de los y las encuestados/as tiene la secundaria completa. Al mismo tiempo, si a este porcentaje le sumamos aquellas personas que dicen tener algún tipo de estudio superior, el total asciende al 79,95%. Esto implica que la gran mayoría de quienes respondieron la encuesta tiene al menos estudios secundarios completos. 
 
 ```{r distribución de respuestas según nivel educativo}
 
@@ -204,21 +208,21 @@ EncPer %>%
 
 PRIMERAS RELACIONES
 
-En términos globales, **casi la totalidad de las personas encuestadas, prefiere a la democracia como sistema de gobierno**.
+Casi la totalidad de las personas considera que la democracia es preferible a cualquier otra forma de gobierno.
+
 
 ```{r,fig.width=8}
 EncPer %>%
 ggplot(aes(PrefDemoc,fill=PrefDemoc),na.rm=TRUE)+
   geom_bar()+
-
-    scale_fill_brewer(palette="Accent")+
-
+    scale_fill_brewer(palette="Accent",name="Preferencia por la democracia")+
   labs(title = "¿Considerás a la democracia preferible a cualquier 
        otra forma de gobierno?",
        subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC",
      x="Prefiere a la democracia sobre otra forma de gobierno",
                    x=2,y=2000,size=3) +
- theme_ipsum_rc(base_size = 12)
+ theme_ipsum_rc(base_size = 12)+
+    geom_text(aes(label = ..count..), stat = "count", vjust = 1,size=4,color="black")
 ```
 
 Si analizamos la relación entre el rango etario y la respuesta a la pregunta ¿considerás a la democracia preferible a cualquier otra forma de gobierno? **no observamos variaciones significativas entre los diferentes rangos etarios**.
@@ -226,8 +230,8 @@ Si analizamos la relación entre el rango etario y la respuesta a la pregunta ¿
 ```{r,fig.width=8}
 EncPer %>%
 ggplot(aes(intervalos_edad,fill=PrefDemoc),na.rm=TRUE)+
-geom_bar()+
-   scale_fill_brewer(palette="Accent")+
+geom_bar(position="dodge")+
+   scale_fill_brewer(palette="Accent",name="Preferencia por la democracia")+
 labs(title = "Relación entre preferencia por la Democracia y rango etario", x = "Rango Etario", y = "Prefiere la Democracia a otro sistema de gobierno",
        subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC") +
     annotate("text",label="No observamos variaciones significativas según la edad",
@@ -246,7 +250,7 @@ EncPer %>%
   filter(!is.na(PrefDemoc)) %>% 
 ggplot(aes(Trabajo),na.rm=TRUE)+
     geom_bar(aes(fill=PrefDemoc),position="fill")+
-    scale_fill_brewer(palette="Accent")+
+    scale_fill_brewer(palette="Accent",name="Preferencia por la Democracia")+
   labs(title = "Relación entre preferencia por la Democracia y Trabajo", x = "Trabajo", y = "Prefiere la Democracia a otro sistema de gobierno",subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC") +
       theme_ipsum_rc(base_size = 10)
   
@@ -255,7 +259,9 @@ ggplot(aes(Trabajo),na.rm=TRUE)+
 
 
 
-Al consultar por el grado de satisfacción con el sistema democrático, obtenemos que más del 40% de las personas, se encuentran satisfechas con la democracia. 
+El 50,9% manifiesta estar de algún modo satisfecho con el funcionamiento de la democracia. 
+El 15,8% dice no estarlo. Asimismo, el 33,3% expresa un bajo grado de satisfacción.
+
 
 ```{r}
 Satis<-EncPer %>% 
@@ -279,14 +285,15 @@ Satis %>%
 
 RELACIÓN ENTRE GRADO DE SATISFACCIÓN CON LA DEMOCRACIA Y EDAD
 
-Nos interesa conocer si el grado de satisfacción con la democracia, varía con la edad. Podemos observar fluctuaciones entre las diferentes edades, pero no podemos asociarlas a rangos etarios. 
+Nos interesa conocer si el grado de satisfacción con la democracia, varía con la edad. Podemos observar fluctuaciones entre las diferentes edades, pero no podemos asociarlas a rangos etarios. El 50,9% manifiesta estar de algún modo satisfecho con el funcionamiento de la democracia. El 15,8% dice no estarlo. Asimismo, el 33,3% expresa un bajo grado de satisfacción.
+
 
 ```{r,fig.width=8}
 EncPer %>%
   filter(!is.na(Satis)) %>%
   ggplot(aes(Edad, fill = Satis),color="Edad") +
   geom_density(alpha=0.8) +
-    scale_fill_viridis_d()+
+    scale_fill_viridis_d(name="Grado de satisfacción")+
   labs(
     title = "Satisfacción con la Democracia",
     subtitle = "Fuente: Encuesta de Percepciones sobre la Democracia y TIC",
@@ -300,16 +307,18 @@ EncPer %>%
 
 LA TECNOLOGÍA COMO DERECHO HUMANO
 
-La mayoría de las personas considera que el acceso a la tecnología es un derecho humano. 
+Se registra un extendido acuerdo sobre que el acceso a las Tecnologías es un Derecho Humano: el 95,1% de lxs encuestados respondió que Sí. 
+
 
 ```{r,fig.width=8}
 EncPer %>% 
   filter(!is.na(La_tecnología_es_un_DDHH)) %>% 
   ggplot(aes(La_tecnología_es_un_DDHH,fill=La_tecnología_es_un_DDHH))+
   geom_bar()+
-  scale_fill_brewer(palette="Accent")+
+  scale_fill_brewer(palette="Accent",name="La tecnología es un Derecho Humano")+
   labs(title = "La tecnología como Derecho Humano", x = "¿Considerás que el acceso a las TIC es un DDHH?",subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC") +
-      theme_ipsum_rc(base_size = 10)
+      theme_ipsum_rc(base_size = 10)+
+  geom_text(aes(label = ..count..), stat = "count", vjust = 1,size=4,color="white")
 ```
 
 
@@ -320,8 +329,15 @@ EncPer %>%
   filter(!is.na(La_tecnología_es_un_DDHH)) %>% 
   ggplot(aes(Edad,fill=La_tecnología_es_un_DDHH))+
   geom_histogram(alpha=0.8)+
-    scale_fill_brewer(palette="Accent")+
+ 
+    scale_fill_brewer(palette="Accent",name="La tecnología es un Derecho Humano")+
   labs(title = "La tecnología como Derecho Humano", x = "¿Considerás que el acceso a las TIC es un DDHH?",subtitle="Fuente: Encuesta de Percepciones sobre la Democracia y TIC") +
       theme_ipsum_rc(base_size = 10)
+   
 ```
+
+
+**CONCLUSIONES PRELIMINARES**
+
+En este trabajo es una primera aproximación al análisis de los resultados de la Encuesta. Como conclusión relevante para el Programa Punto Digital, podemos mencionar que casi la totalidad de las personas encuestadas considera que el acceso a la tecnología es un derecho humano, y que el 50,9% manifiesta estar de algún modo satisfecho con el funcionamiento de la democracia.
 
