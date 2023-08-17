@@ -1,5 +1,5 @@
 ---
-title: "Trabajo Final Visualización"
+title: "Encuesta Percepciones sobre Democracia y Tecnología en Argentina"
 author: "Fernanda López Franz"
 date: "2023-08-04"
 output: html_document
@@ -115,7 +115,10 @@ EncPer %>%
 ```
 
 
+
+
 GÉNERO
+
 En cuanto al género, utilizamos el criterio implementado en el último Censo Nacional para establecer las categorías.  El 62% de las encuestadas se identifica como mujer, el 36% como varón, el 1% prefiere no especificar, el 0.3% se identifica como mujer trans, el 0.11% como travesti y el 0.03% como varón trans. 
 
 ```{r Distribución de cantidad de respuestas por Género}
@@ -138,7 +141,9 @@ Género |>
 
 
 
+
 RANGO ETARIO
+
 Si bien el promedio de edad es, como mecionamos, de 35 años, la mayoría de las personas encuestadas tiene entre 16 y 26 años, decreciendo hacia edades mayores. El máximo es de 
 
 ```{r distribución de respuestas por rango de edad,fig.width=8}
@@ -159,6 +164,7 @@ ggplot(EncPer, aes(x = intervalos_edad,fill=intervalos_edad,na.rm=TRUE)) +
 
 
 NIVEL EDUCATIVO
+
 Sobre el nivel educativo, vemos que casi el 30% de la población encuestada posee secundaria completa seguidos por quienes cuentan con terciario completo y secundaria incompleta. 
 
 ```{r distribución de respuestas según nivel educativo}
@@ -189,23 +195,15 @@ TRABAJO
 Casi el 80 % de la población encuestada trabaja.
 
 ```{r}
-Trabajo <- table(EncPer$Trabajo)
-Trabajo <- data.frame(valores = names(Trabajo), frecuencia = as.vector(Trabajo)) %>% 
-arrange(desc(frecuencia)) %>% 
-mutate(porcentaje = (frecuencia/ sum(frecuencia)) * 100) %>% 
-  rename(c("Trabaja"=valores,"Total"=frecuencia,"Porcentaje"=porcentaje)) %>% 
-  knitr::
-print(Trabajo)
-
-   
-
-
-
-
+EncPer %>% 
+  count(Trabajo,name="Total")
+  
 ```
 
 
+
 PRIMERAS RELACIONES
+
 En términos globales, **casi la totalidad de las personas encuestadas, prefiere a la democracia como sistema de gobierno**.
 
 ```{r,fig.width=8}
@@ -274,11 +272,11 @@ Satis %>%
   cols_label(
     Satis = "Grado de Satisfacción con la democracia",
     Total = "Total",
-    Porcentaje = "Porcentaje") %>% 
-print(Satis)
+    Porcentaje = "Porcentaje")
  
 
 ```
+
 RELACIÓN ENTRE GRADO DE SATISFACCIÓN CON LA DEMOCRACIA Y EDAD
 
 Nos interesa conocer si el grado de satisfacción con la democracia, varía con la edad. Podemos observar fluctuaciones entre las diferentes edades, pero no podemos asociarlas a rangos etarios. 
@@ -299,7 +297,9 @@ EncPer %>%
     theme_ipsum_rc(base_size = 10)
 ```
 
+
 LA TECNOLOGÍA COMO DERECHO HUMANO
+
 La mayoría de las personas considera que el acceso a la tecnología es un derecho humano. 
 
 ```{r,fig.width=8}
@@ -313,7 +313,7 @@ EncPer %>%
 ```
 
 
-Si observamos si hay cambios en la percepción de la tecnología como derecho humanos, de acuerdo a la edad de las personas encuestadas, 
+Si observamos si hay cambios en la percepción de la tecnología como derecho humanos, de acuerdo a la edad de las personas encuestadas. 
 
 ```{r,fig.width=8}
 EncPer %>% 
